@@ -129,10 +129,13 @@ The existing HTML prototype already defines a working UX vocabulary — landscap
 - **Placeholder-sector pattern at the record level**, not just the sector level: `is_placeholder` + `canonical_record_id` lets a stub entry in one sector point at the full entry in another (the schema's stated use case), which the prototype's flat arrays can't represent at all.
 - **Two-clock read surface** (`v_policy_signal_by_category`) for the connecting repository once it exists.
 
-**Editorial workflow (draft, needs confirmation — see [Open questions](#open-questions)):**
-- Roles: researcher (create/edit, triggers `record_history`), reviewer (approve status changes, e.g. evolving → resolved reclassification), public (read-only).
+**Editorial workflow:**
+- Roles: **researcher** (create/edit, triggers `record_history`), **reviewer** (approves status changes — e.g. evolving → resolved reclassification, and new/edited records before they go live), **public** (read-only, no login — see [Resolved decisions](#resolved-decisions)).
+- Researcher edits land in a pending state; a reviewer approves before a record is publicly visible or a status change takes effect. This needs an explicit workflow state on `records` beyond v2's `status` enum (which tracks the record's real-world status, not its editorial review state) — see the schema note below.
 - Upsert-by-`record_key` remains the update mechanism for both the UI form path and CSV import, matching v2's stated workflow.
 - Retirement is always via `status`, never deletion, matching v2.
+
+This adds one thing to the schema beyond the three extensions above: a `review_status` enum (`draft` \| `pending_review` \| `approved`) and a `submitted_by`/`reviewed_by` pair on `records`, plus the same on edits captured via `record_history`. Left out of `docs/schema.sql` for this pass — it's a Phase 3 concern, worth designing alongside the actual approval-queue UI rather than speculatively now.
 
 ## Proposed stack
 
@@ -162,17 +165,17 @@ The prototype's `R()` tuple format already maps directly onto `CSV_COLS` (`secti
 | Phase | Scope |
 |---|---|
 | 0 | This design doc (done) |
-| 1 | Apply `docs/schema.sql` to a real Neon database; run the migration script against all six sectors; verify row counts and spot-check against the prototype |
-| 2 | Next.js read-only app (landscape grid, sector view, tabs/sub-tabs, search) deployed to Render, replacing the static HTML prototype |
-| 3 | Editorial write path: auth, record edit forms, CSV import/export against the database, `record_history` writes, re-verification queue view |
-| 4 | `people`/`record_people` population, `sector_taxonomy_xref` populated once QUILT's ontology codes are confirmed |
+| 1 | Apply `docs/schema.sql` to a real Neon database; run the migration script against all six sectors; verify row counts and spot-check against the prototype; add one placeholder-status sector row to exercise the "Coming soon" pattern (see [Resolved decisions](#resolved-decisions)) |
+| 2 | Next.js read-only app (landscape grid, sector view, tabs/sub-tabs, search) deployed to Render, replacing the static HTML prototype — public, no login |
+| 3 | Editorial write path: auth, researcher/reviewer roles, `review_status` + approval queue, record edit forms, CSV import/export against the database, `record_history` writes, re-verification queue view |
+| 4 | `people`/`record_people` population, `sector_taxonomy_xref` populated from QUILT's ontology codes, seventh sector promoted from placeholder to active once its content is ready |
 | 5 | `v_policy_signal_by_category` consumed by the connecting repository once that module exists — genuinely blocked on that repo, not on this one |
 
-## Open questions
+## Resolved decisions
 
-Things this design doesn't resolve unilaterally:
+From the initial open-questions pass:
 
-1. **Editorial roles.** Is this single-editor (just you) for the foreseeable future, or multi-user with a researcher/reviewer split from the start? Affects whether Phase 3 needs an approval workflow or just an audit log.
-2. **Public access.** Fully open read access (like the current prototype, which is just a static HTML file), or gated behind some access control given it's feeding advisory/DD work?
-3. **New sectors.** Is the six-sector list (matching the 2025 Modern Industrial Strategy) considered closed, or should the schema's placeholder-sector pattern be exercised soon for a seventh?
-4. **QUILT ontology codes.** Needed to actually populate `sector_taxonomy_xref` — not blocking for Phases 1-3, but worth getting early so Phase 4/5 isn't guessing.
+1. **Editorial roles** → multi-user, researcher/reviewer split from the start. Phase 3 builds an approval queue (`review_status`), not just an audit log — see [Features and functionality](#features-and-functionality).
+2. **Public access** → fully open read, no login, matching the current prototype. Only the write path (Phase 3) requires auth.
+3. **Sector scope** → not closed; a seventh sector is expected reasonably soon. The placeholder-sector pattern (`sectors.status = 'placeholder'`, a disabled "Coming soon" card in the landscape grid — already present in the current prototype's `SECTOR_META`/`renderLandscape()`, just unused today) gets exercised in Phase 1 rather than left untested until the seventh sector is actually ready. Which sector is still open — flag it when known so its `sector_id` slug can be reserved and checked against QUILT's ontology at the same time.
+4. **QUILT ontology codes** → you'll pull these directly rather than leaving it a standing open item. Once available, they populate `sector_taxonomy_xref` (Phase 4) — share them whenever convenient, doesn't block Phases 1-3.
