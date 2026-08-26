@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Tech Intelligence Stack — Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F6F8; --paper:#FFFFFF; --ink:#1B2130; --ink-soft:#5B6273; --rule:#DBDFE6;
+    --built:#2A7F7B; --built-soft:#E4F1F0;
+    --proposed:#B85C2C; --proposed-soft:#F6E9DF;
+    --output:#4F4380; --output-soft:#EBE6F5;
+    --source:#6B7280; --source-soft:#EEF0F2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'IBM Plex Sans',-apple-system,Segoe UI,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .doc{max-width:760px; margin:0 auto; padding:56px 28px 80px;}
+  .thread{border-left:2px solid var(--rule); margin-left:6px; padding-left:26px;}
+  header.top{border-left:none; margin-left:0; padding-left:0; margin-bottom:44px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px;
+  }
+  h1{font-size:28px; font-weight:700; margin:0 0 8px; letter-spacing:-.01em;}
+  .lede{font-size:15.5px; color:var(--ink-soft); max-width:56ch; margin:0;}
+  .meta{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-top:18px;}
+  section{position:relative; margin-bottom:46px;}
+  section::before{
+    content:""; position:absolute; left:-31px; top:6px; width:9px; height:9px;
+    border-radius:50%; background:var(--paper); border:2px solid var(--rule);
+  }
+  h2{font-size:16px; font-weight:600; margin:0 0 16px;}
+  .components{list-style:none; margin:0; padding:0; display:grid; gap:10px;}
+  .components li{
+    background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+    padding:13px 16px; display:flex; align-items:baseline; gap:12px;
+  }
+  .pill{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
+    letter-spacing:.03em; padding:2px 8px; border-radius:20px; white-space:nowrap;
+  }
+  .pill.built{background:var(--built-soft); color:var(--built);}
+  .pill.proposed{background:var(--proposed-soft); color:var(--proposed);}
+  .comp-name{font-weight:600; font-size:14.5px;}
+  .comp-desc{color:var(--ink-soft); font-size:13.5px;}
+  .diagram-wrap{
+    background:var(--paper); border:1px solid var(--rule); border-radius:14px;
+    padding:20px; margin-bottom:12px;
+  }
+  svg.diagram-svg{width:100%; height:auto; display:block;}
+  .caption{font-size:12.5px; color:var(--ink-soft); margin:0;}
+  .ledger{list-style:none; margin:0; padding:0; display:grid; gap:14px;}
+  .ledger li{display:grid; grid-template-columns:34px 1fr; gap:12px;}
+  .ledger .num{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft);
+    padding-top:1px;
+  }
+  .ledger .label{font-weight:600; font-size:13.5px; margin-bottom:2px;}
+  .ledger .rationale{font-size:13.5px; color:var(--ink-soft);}
+  .outputs{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .outputs .card{
+    background:var(--output-soft); border:1px solid var(--output); border-radius:10px;
+    padding:14px 16px;
+  }
+  .outputs .card h3{margin:0 0 4px; font-size:13.5px; color:var(--output);}
+  .outputs .card p{margin:0; font-size:13px; color:var(--ink-soft);}
+  .flags{list-style:none; margin:0; padding:0; display:grid; gap:10px;}
+  .flags li{
+    border-left:3px solid var(--proposed); background:var(--proposed-soft);
+    border-radius:0 8px 8px 0; padding:10px 14px; font-size:13.5px; color:var(--ink);
+  }
+  .flags b{color:var(--proposed);}
+  footer{
+    border-left:none; margin-left:0; padding-left:0; margin-top:56px;
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);
+    border-top:1px solid var(--rule); padding-top:16px;
+  }
+  @media (max-width:520px){ .outputs{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important;} }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <header class="top">
+    <p class="eyebrow">Architecture briefing — visual</p>
+    <h1>Deep Tech Intelligence Stack</h1>
+    <p class="lede">Five components, one join key. This is the visual companion to the textual briefing note — for driving the specification of the two proposed components.</p>
+    <p class="meta">26 AUG 2026 · SEE deep-tech-stack-briefing-notes.md FOR FULL RATIONALE</p>
+  </header>
+
+  <div class="thread">
+
+    <section>
+      <h2>The five components</h2>
+      <ul class="components">
+        <li><span class="pill built">Built</span><span><span class="comp-name">QUILT</span><br><span class="comp-desc">Innovate UK grant data, classified by a Deep Tech Ontology.</span></span></li>
+        <li><span class="pill built">Built</span><span><span class="comp-name">Funding stack analyser (dtfunding)</span><br><span class="comp-desc">Capital structure reconstructed from Companies House filings.</span></span></li>
+        <li><span class="pill built">Built</span><span><span class="comp-name">Founderfluence</span><br><span class="comp-desc">Founder Mode framework tested against interviews and press.</span></span></li>
+        <li><span class="pill proposed">Proposed</span><span><span class="comp-name">Policy tracker</span><br><span class="comp-desc">Six-category taxonomy applied to strategy and policy documents.</span></span></li>
+        <li><span class="pill proposed">Proposed</span><span><span class="comp-name">Investor tracker</span><br><span class="comp-desc">Investor entity graph scoped to frontier-tech company stakes.</span></span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The stack, and how it converges</h2>
+      <div class="diagram-wrap">
+        <svg class="diagram-svg" viewBox="0 0 680 460" role="img" aria-label="Five sources feed five platforms, converging into a connecting repository joined on company number, producing advisory outputs and the book's empirical spine.">
+          <defs>
+            <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#5B6273" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <g fill="#EEF0F2" stroke="#6B7280" stroke-width="1.25">
+            <rect x="40" y="40" width="106" height="44" rx="8"/>
+            <rect x="161" y="40" width="106" height="44" rx="8"/>
+            <rect x="282" y="40" width="106" height="44" rx="8"/>
+            <rect x="403" y="40" width="106" height="44" rx="8"/>
+            <rect x="524" y="40" width="106" height="44" rx="8"/>
+          </g>
+          <g font-family="IBM Plex Sans, sans-serif" font-size="12.5" font-weight="600" fill="#1B2130" text-anchor="middle">
+            <text x="93" y="66">IUK grants</text>
+            <text x="214" y="66">Strategy</text>
+            <text x="335" y="66">CH filings</text>
+            <text x="456" y="66">Interviews</text>
+            <text x="577" y="66">Deal news</text>
+          </g>
+          <g stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow1)">
+            <line x1="93" y1="84" x2="93" y2="134"/><line x1="214" y1="84" x2="214" y2="134"/>
+            <line x1="335" y1="84" x2="335" y2="134"/><line x1="456" y1="84" x2="456" y2="134"/>
+            <line x1="577" y1="84" x2="577" y2="134"/>
+          </g>
+          <rect x="40" y="134" width="106" height="56" rx="8" fill="#E4F1F0" stroke="#2A7F7B" stroke-width="1.25"/>
+          <rect x="161" y="134" width="106" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <rect x="282" y="134" width="106" height="56" rx="8" fill="#E4F1F0" stroke="#2A7F7B" stroke-width="1.25"/>
+          <rect x="403" y="134" width="106" height="56" rx="8" fill="#E4F1F0" stroke="#2A7F7B" stroke-width="1.25"/>
+          <rect x="524" y="134" width="106" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <g font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130" text-anchor="middle">
+            <text x="93" y="157">QUILT</text><text x="214" y="157">Policy</text>
+            <text x="335" y="157">Fund stack</text><text x="456" y="157">Founders</text>
+            <text x="577" y="157">Investors</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273" text-anchor="middle">
+            <text x="93" y="176">Funding</text><text x="214" y="176">Taxonomy</text>
+            <text x="335" y="176">Cap &amp; rounds</text><text x="456" y="176">Role-mix</text>
+            <text x="577" y="176">Frontier</text>
+          </g>
+          <g stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow1)">
+            <line x1="93" y1="190" x2="93" y2="240"/><line x1="214" y1="190" x2="214" y2="240"/>
+            <line x1="335" y1="190" x2="335" y2="240"/><line x1="456" y1="190" x2="456" y2="240"/>
+            <line x1="577" y1="190" x2="577" y2="240"/>
+          </g>
+          <rect x="40" y="240" width="590" height="64" rx="12" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <text x="335" y="264" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="14" font-weight="700" fill="#1B2130">Connecting repository</text>
+          <text x="335" y="284" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5B6273">Unified entity graph — joined on company number</text>
+          <g stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow1)">
+            <line x1="175" y1="304" x2="175" y2="354"/><line x1="495" y1="304" x2="495" y2="354"/>
+          </g>
+          <rect x="40" y="354" width="270" height="56" rx="8" fill="#EBE6F5" stroke="#4F4380" stroke-width="1.25"/>
+          <rect x="360" y="354" width="270" height="56" rx="8" fill="#EBE6F5" stroke="#4F4380" stroke-width="1.25"/>
+          <text x="175" y="377" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Advisory outputs</text>
+          <text x="175" y="396" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Due diligence + policy guidance</text>
+          <text x="495" y="377" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Book empirical spine</text>
+          <text x="495" y="396" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Crowd-in/out and two-clock tests</text>
+          <rect x="265" y="424" width="12" height="12" rx="2" fill="#E4F1F0" stroke="#2A7F7B"/>
+          <text x="283" y="434" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5B6273">Built</text>
+          <rect x="345" y="424" width="12" height="12" rx="2" fill="#F6E9DF" stroke="#B85C2C"/>
+          <text x="363" y="434" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5B6273">Proposed</text>
+        </svg>
+      </div>
+      <p class="caption">Every column resolves to the same company via its Companies House number — that's what makes the fifth tier possible.</p>
+    </section>
+
+    <section>
+      <h2>Six linkages, in order of how they'd get built</h2>
+      <ol class="ledger">
+        <li><span class="num">01</span><div><div class="label">QUILT → Investor tracker</div><div class="rationale">Frontier-tech tags define the investor tracker's scope — not all UK investors, only those in QUILT-tagged companies.</div></div></li>
+        <li><span class="num">02</span><div><div class="label">QUILT ↔ Policy tracker</div><div class="rationale">Funding deployment checked against policy signal, by technology category — the two-clock mismatch, made measurable.</div></div></li>
+        <li><span class="num">03</span><div><div class="label">dtfunding → Investor tracker</div><div class="rationale">Reuses the existing SH01/CS01/AR01 extraction; adds the PSC register to unwind fund vehicles to the people behind them.</div></div></li>
+        <li><span class="num">04</span><div><div class="label">dtfunding → Founderfluence</div><div class="rationale">Dated capital events replace manually-tracked milestones — the funding lens, turning role-mix into a real time series.</div></div></li>
+        <li><span class="num">05</span><div><div class="label">Policy tracker ↔ Investor tracker</div><div class="rationale">Named policy leaders cross-reference against PSC/GP identities — surfacing people who sit on both sides.</div></div></li>
+        <li><span class="num">06</span><div><div class="label">Government-backed cascade</div><div class="rationale">BBB/NSSIF public LP commitments traced through Companies House, cross-referenced against QUILT's grant list — two government channels, separated.</div></div></li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Investor tracker — entity resolution pipeline</h2>
+      <div class="diagram-wrap">
+        <svg class="diagram-svg" viewBox="0 0 380 535" role="img" aria-label="Cap table and PSC data plus government LP commitment lists feed entity resolution, producing an investor graph, a government-backed cascade trace, and a crowd-in versus crowd-out test by channel.">
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#5B6273" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <rect x="40" y="40" width="140" height="56" rx="8" fill="#E4F1F0" stroke="#2A7F7B" stroke-width="1.25"/>
+          <rect x="200" y="40" width="140" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <text x="110" y="63" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Cap tables</text>
+          <text x="110" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">SH01 + PSC data</text>
+          <text x="270" y="63" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Govt LP list</text>
+          <text x="270" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">BBB &amp; NSSIF data</text>
+          <g stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow2)">
+            <line x1="110" y1="96" x2="190" y2="140"/>
+            <line x1="270" y1="96" x2="190" y2="140"/>
+          </g>
+          <rect x="80" y="140" width="220" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <text x="190" y="163" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Entity resolution</text>
+          <text x="190" y="182" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Canonical investor IDs</text>
+          <line x1="190" y1="196" x2="190" y2="236" stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow2)"/>
+          <rect x="80" y="236" width="220" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <text x="190" y="259" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Investor graph</text>
+          <text x="190" y="278" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Individuals &amp; vehicles</text>
+          <line x1="190" y1="292" x2="190" y2="332" stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow2)"/>
+          <rect x="80" y="332" width="220" height="56" rx="8" fill="#F6E9DF" stroke="#B85C2C" stroke-width="1.25"/>
+          <text x="190" y="355" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Govt-backed cascade</text>
+          <text x="190" y="374" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Portfolio vs grant list</text>
+          <line x1="190" y1="388" x2="190" y2="428" stroke="#5B6273" stroke-width="1.5" marker-end="url(#arrow2)"/>
+          <rect x="80" y="428" width="220" height="56" rx="8" fill="#EBE6F5" stroke="#4F4380" stroke-width="1.25"/>
+          <text x="190" y="451" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="700" fill="#1B2130">Crowd-in/out by channel</text>
+          <text x="190" y="470" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#5B6273">Direct grants vs govt equity</text>
+          <rect x="110" y="500" width="12" height="12" rx="2" fill="#F6E9DF" stroke="#B85C2C"/>
+          <text x="128" y="510" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5B6273">Proposed</text>
+          <rect x="200" y="500" width="12" height="12" rx="2" fill="#EBE6F5" stroke="#4F4380"/>
+          <text x="218" y="510" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5B6273">Output</text>
+        </svg>
+      </div>
+      <p class="caption">Entity resolution — collapsing name variants into one canonical investor ID — is the actual build. Everything else reuses extraction that already exists.</p>
+    </section>
+
+    <section>
+      <h2>What it's for</h2>
+      <div class="outputs">
+        <div class="card"><h3>Advisory outputs</h3><p>Due diligence and policy guidance — the near-term application.</p></div>
+        <div class="card"><h3>Book empirical spine</h3><p>Crowd-in/crowd-out test and two-clock mismatch validation — the dataset the causal-inference chapter needs.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Carry into specification</h2>
+      <ul class="flags">
+        <li><b>LP disclosure timing.</b> UK limited partnership transparency reforms are phasing in through 2026. Historical filings stay thin; anything filed forward should improve.</li>
+        <li><b>Offshore blind spot.</b> Non-UK LP vehicles won't appear in Companies House. The government-LP cascade is largely insulated from this; a complete private-LP picture is not.</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <footer>Companion note — deep-tech-stack-briefing-notes.md</footer>
+</div>
+</body>
+</html>
