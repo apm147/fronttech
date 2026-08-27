@@ -10,7 +10,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters", "views"]
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -226,6 +226,6 @@ view PolicySignalByCategory {
   status       RecordStatus
   sourceTier   SourceTier? @map("source_tier")
 
-  @@id([recordKey])
+  @@unique([recordKey])
   @@map("v_policy_signal_by_category")
 }
