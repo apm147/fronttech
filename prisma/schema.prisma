@@ -1,0 +1,231 @@
+// Prisma schema — mirrors docs/schema.sql (the design reference) plus the
+// three extensions from docs/DESIGN.md. docs/schema.sql remains the
+// authoritative reference for *why* each field/table exists; this file is
+// what the app and `prisma migrate`/`prisma generate` actually operate on.
+//
+// Matches the Founderfluence module's convention: Prisma Client with the
+// @prisma/adapter-pg driver adapter (see src/lib/prisma.ts), so DATABASE_URL
+// is read at runtime by the adapter rather than by Prisma's own connection
+// pooling — consistent across the stack's modules.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters", "views"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── enums ──
+
+enum SectionKey {
+  timeline
+  institution
+  initiative
+  regulation
+  breakthrough
+  evolving
+
+  @@map("section_key")
+}
+
+enum SubtabKey {
+  domestic
+  international
+  export
+  nsi
+  standards
+  ipsec
+  crit_infra        @map("crit-infra")
+  cybercrime
+  consumer_telecoms @map("consumer-telecoms")
+  codes_standards   @map("codes-standards")
+  spectrum
+  infra_access      @map("infra-access")
+  satellite
+
+  @@map("subtab_key")
+}
+
+enum RecordStatus {
+  active
+  dissolved
+  paused
+  liquidation
+
+  @@map("record_status")
+}
+
+enum SourceTier {
+  primary
+  secondary
+  partial
+
+  @@map("source_tier")
+}
+
+enum DatePrecision {
+  year
+  month
+  day
+  range
+
+  @@map("date_precision")
+}
+
+// ── v2 base tables ──
+
+model Sector {
+  sectorId          String    @id @map("sector_id")
+  label             String
+  status            String    @default("active")
+  framingText       String?   @map("framing_text")
+  methodologyNotes  String?   @map("methodology_notes")
+  lastReviewedDate  DateTime? @map("last_reviewed_date") @db.Date
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  records          Record[]
+  badges           Badge[]
+  taxonomyXrefs    SectorTaxonomyXref[]
+
+  @@map("sectors")
+}
+
+model Record {
+  recordId           String         @id @default(uuid()) @map("record_id") @db.Uuid
+  recordKey          String         @unique @map("record_key")
+  sectorId           String         @map("sector_id")
+  sectionKey         SectionKey     @map("section_key")
+  subtabKey          SubtabKey?     @map("subtab_key")
+  title              String
+  subtitle           String?
+  dateLabel          String?        @map("date_label")
+  dateSortKey        DateTime?      @map("date_sort_key") @db.Date
+  datePrecision      DatePrecision? @map("date_precision")
+  description        String
+  url                String?
+  urlVerified        Boolean        @default(false) @map("url_verified")
+  caveat             String?
+  status             RecordStatus   @default(active)
+  isPlaceholder      Boolean        @default(false) @map("is_placeholder")
+  canonicalRecordId  String?        @map("canonical_record_id") @db.Uuid
+  sourceTier         SourceTier?    @map("source_tier")
+  lastVerifiedDate   DateTime?      @map("last_verified_date") @db.Date
+  sortOrder          Int?           @map("sort_order")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @default(now()) @updatedAt @map("updated_at")
+
+  sector             Sector          @relation(fields: [sectorId], references: [sectorId])
+  canonicalRecord    Record?         @relation("PlaceholderToCanonical", fields: [canonicalRecordId], references: [recordId])
+  placeholders       Record[]        @relation("PlaceholderToCanonical")
+  recordBadges       RecordBadge[]
+  recordHistory      RecordHistory[]
+  recordPeople       RecordPerson[]
+
+  @@index([sectorId, sectionKey])
+  @@index([subtabKey])
+  @@index([canonicalRecordId])
+  @@index([lastVerifiedDate])
+  @@map("records")
+}
+
+model Badge {
+  badgeId  String  @id @map("badge_id")
+  sectorId String  @map("sector_id")
+  label    String
+
+  sector       Sector        @relation(fields: [sectorId], references: [sectorId])
+  recordBadges RecordBadge[]
+
+  @@unique([sectorId, label])
+  @@map("badges")
+}
+
+model RecordBadge {
+  recordId String @map("record_id") @db.Uuid
+  badgeId  String @map("badge_id")
+
+  record Record @relation(fields: [recordId], references: [recordId], onDelete: Cascade)
+  badge  Badge  @relation(fields: [badgeId], references: [badgeId])
+
+  @@id([recordId, badgeId])
+  @@map("record_badges")
+}
+
+model RecordHistory {
+  historyId    String   @id @default(uuid()) @map("history_id") @db.Uuid
+  recordId     String   @map("record_id") @db.Uuid
+  changedField String   @map("changed_field")
+  oldValue     String?  @map("old_value")
+  newValue     String?  @map("new_value")
+  changeReason String?  @map("change_reason")
+  sourceRef    String?  @map("source_ref")
+  changedBy    String   @map("changed_by")
+  changedAt    DateTime @default(now()) @map("changed_at")
+
+  record Record @relation(fields: [recordId], references: [recordId])
+
+  @@index([recordId, changedAt])
+  @@map("record_history")
+}
+
+// ── extensions (docs/DESIGN.md) ──
+
+model Person {
+  personId       String   @id @default(uuid()) @map("person_id") @db.Uuid
+  fullName       String   @map("full_name")
+  normalizedName String   @map("normalized_name")
+  roleTitle      String?  @map("role_title")
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  recordPeople RecordPerson[]
+
+  @@index([normalizedName])
+  @@map("people")
+}
+
+model RecordPerson {
+  recordId   String  @map("record_id") @db.Uuid
+  personId   String  @map("person_id") @db.Uuid
+  roleAtTime String? @map("role_at_time")
+
+  record Record @relation(fields: [recordId], references: [recordId], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [personId])
+
+  @@id([recordId, personId])
+  @@map("record_people")
+}
+
+model SectorTaxonomyXref {
+  sectorId       String @map("sector_id")
+  externalSystem String @map("external_system")
+  externalCode   String @map("external_code")
+
+  sector Sector @relation(fields: [sectorId], references: [sectorId])
+
+  @@id([sectorId, externalSystem])
+  @@map("sector_taxonomy_xref")
+}
+
+// Read-only — created by prisma/migrations/0001_init/migration.sql, not by
+// Prisma's own migration diffing. `views` is a Preview feature; if it causes
+// friction with the installed Prisma version, drop this block and query the
+// view with $queryRaw instead — nothing else in the schema depends on it.
+view PolicySignalByCategory {
+  sectorId     String     @map("sector_id")
+  sectorLabel  String     @map("sector_label")
+  sectionKey   SectionKey @map("section_key")
+  signalMonth  DateTime?  @map("signal_month") @db.Date
+  recordKey    String     @map("record_key")
+  title        String
+  status       RecordStatus
+  sourceTier   SourceTier? @map("source_tier")
+
+  @@id([recordKey])
+  @@map("v_policy_signal_by_category")
+}
