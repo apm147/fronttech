@@ -12,7 +12,16 @@ import { Pool } from 'pg';
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    // Without this check, `pg` silently falls back to a default local
+    // connection (localhost:5432) and every query fails with a generic
+    // ECONNREFUSED that gives no hint the real problem is a missing/empty
+    // env var — a trap in exactly this shape on Render, where the app
+    // starts fine and only fails on the first request.
+    throw new Error('DATABASE_URL is not set — check the environment configuration (.env locally, the platform dashboard in production).');
+  }
+  const pool = new Pool({ connectionString });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
