@@ -1,5 +1,14 @@
 # Working notes for Claude Code sessions on this repo
 
+## Mid-handover — read docs/HANDOVER.md first
+
+As of 2026-08-27 there's an in-progress handover from a previous session:
+Phase 1 (database) is written and locally validated but not yet applied to
+the real Neon database, pending a network-allowlist fix that needed a fresh
+session to test. **Read `docs/HANDOVER.md` before doing anything else.**
+(That file is meant to be deleted/trimmed once Phase 1 is confirmed done —
+if it's gone, this note is stale and safe to remove too.)
+
 ## The user has no local machine
 
 The user runs Claude Code from a tablet — there is no local terminal to hand
