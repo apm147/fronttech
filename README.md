@@ -4,7 +4,7 @@ A dated, categorized feed of UK strategy documents, consultations, and funding-b
 
 This is one of five components in a broader Deep Tech Intelligence Stack — see [`docs/DESIGN.md`](docs/DESIGN.md) for how it fits with QUILT (funded-projects intelligence), dtfunding (capital structure), Founderfluence (founder narrative), and the proposed investor tracker.
 
-**Status:** Phase 2 (read-only app). Schema and seed data are applied to the real Neon database (see `docs/DESIGN.md`'s Phase 1 roadmap row). The Next.js read-only app — landscape grid, sector view with tabs/sub-tabs, cross-sector search — is built and passes a local build/dev check; not yet deployed to Render.
+**Status:** Phase 2 done. Schema and seed data are applied to the real Neon database (see `docs/DESIGN.md`'s Phase 1 roadmap row). The Next.js read-only app — landscape grid, sector view with tabs/sub-tabs, cross-sector search — is deployed to Render and serving real data.
 
 ## Setup
 
