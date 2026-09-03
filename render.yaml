@@ -1,0 +1,27 @@
+# Render Blueprint for the fronttech (Policy tracker) app.
+#
+# Schema migrations are NOT applied as part of this build step -- per
+# README.md, Phase 2's schema/seed data were already applied to the real
+# Neon database by hand (`npx prisma migrate deploy` run manually, not via
+# Render). `postinstall` in package.json runs `prisma generate` automatically
+# on `npm install`, so the build only needs `npm run build` on top of that.
+#
+# --include=dev: NODE_ENV=production below is applied during the build too,
+# and npm skips devDependencies under NODE_ENV=production -- but `next build`
+# needs `typescript` (a devDependency) present.
+#
+# No AUTH_PASSWORD here -- unlike lpinvestors/dtfunding/founderfluence, this
+# app has no password-gate (src/proxy.ts equivalent) today; it's a read-only
+# public app. Flagging, not changing, since that's a product decision.
+services:
+  - type: web
+    name: fronttech
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NODE_ENV
+        value: production

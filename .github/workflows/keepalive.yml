@@ -1,0 +1,26 @@
+name: Keep-alive
+
+# Neon (free tier) pauses a database after ~5 minutes of inactivity, and
+# Render's free-tier web service spins down after ~15 minutes idle. Hitting
+# the public /api/health route periodically keeps both warm and doubles as a
+# live DB connectivity check.
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /api/health
+        run: |
+          url="${{ vars.APP_URL }}/api/health"
+          echo "GET $url"
+          status=$(curl -s -o /tmp/body.json -w "%{http_code}" "$url")
+          cat /tmp/body.json
+          echo
+          if [ "$status" != "200" ]; then
+            echo "Health check failed with HTTP $status"
+            exit 1
+          fi
