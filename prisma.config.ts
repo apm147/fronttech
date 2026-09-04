@@ -18,7 +18,7 @@
 // as already applied rather than re-running or conflicting.
 
 import path from 'node:path';
-import { defineConfig } from 'prisma/config';
+import { defineConfig, env } from 'prisma/config';
 
 // prisma.config.ts opts out of Prisma's own .env auto-loading, so load it
 // ourselves (Node 20.6+ built-in) for local/manual CLI runs. No-op where
@@ -30,6 +30,11 @@ try {
 
 export default defineConfig({
   schema: path.join('prisma', 'schema.prisma'),
+  // Prisma 7 removed `datasource.url` from schema.prisma -- the connection
+  // string for Migrate/CLI operations now belongs here instead (the app
+  // itself never reads this; src/lib/prisma.ts's @prisma/adapter-pg reads
+  // DATABASE_URL directly at runtime, unaffected by this).
+  datasource: { url: env('DATABASE_URL') },
   migrations: {
     seed: 'tsx prisma/seed.ts',
   },
